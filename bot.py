@@ -35,9 +35,9 @@ async def correspondances(ctx):
     
     df_discord_data = pd.DataFrame(user_info)
     
-    RoyaleAPI_scraper = ScrapingRoyaleAPI("UURJ9CG")
+    RoyaleAPI_scraper = ScrapingRoyaleAPI("UURJ9CG", df_discord_data)
     
-    df_players_data = RoyaleAPI_scraper.run(df_discord_data)
+    df_players_data = RoyaleAPI_scraper.run()
     
     df_players_data = df_players_data.astype(str)
     
@@ -87,9 +87,9 @@ async def attacks(ctx):
     
     df_discord_data = pd.DataFrame(user_info)
     
-    RoyaleAPI_scraper = ScrapingRoyaleAPI(CLAN_ID)
+    RoyaleAPI_scraper = ScrapingRoyaleAPI(CLAN_ID, df_discord_data)
     
-    df_players_data = RoyaleAPI_scraper.run(df_discord_data)
+    df_players_data = RoyaleAPI_scraper.run()
     
     df_players_data = df_players_data.astype(str)
     

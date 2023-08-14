@@ -7,20 +7,20 @@ def calculate_match_percentage(name1, name2):
     max_length = max(len(name1), len(name2))
     distance = Levenshtein.distance(name1, name2)
     similarity = 1 - (distance / max_length)
-    print(name1,name2,similarity)
+
     return round(similarity, 3)
 
 class ScrapingRoyaleAPI:
-    def __init__(self, clan_id):
+    def __init__(self, clan_id, df_discord_data):
         
         self.session=HTMLSession()
         
         self.clan_id = clan_id
         
-    def run(self, df_discord_data):
-
         self.df_discord_data = df_discord_data
         
+    def run(self):
+
         self.get_soup()
         
         self.get_clan_data()
