@@ -17,10 +17,10 @@ class ScrapingRoyaleAPI:
         
         self.clan_id = clan_id
         
-        self.df_discord_data = df_discord_data
-        
-    def run(self):
+    def run(self, df_players_data):
 
+        self.df_players_data = df_players_data
+        
         self.get_soup()
         
         self.get_clan_data()
