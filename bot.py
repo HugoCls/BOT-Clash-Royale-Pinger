@@ -5,6 +5,7 @@ from discord import app_commands
 
 TOKEN = "MTEzOTk1NTAxOTc4NTk2MTU1Mg.GRziG1.okuLmjskQZ6S9WJLVRcfX-mvFgC6uWkiH_wh4g"
 SERVER_ID = 913101617639862362
+CLAN_ID = "UURJ9CG"
 
 intents = discord.Intents.all()
 intents.members = True
@@ -86,7 +87,9 @@ async def attacks(ctx):
     
     df_discord_data = pd.DataFrame(user_info)
     
-    RoyaleAPI_scraper = ScrapingRoyaleAPI("UURJ9CG", df_discord_data)
+    print(df_discord_data)
+    
+    RoyaleAPI_scraper = ScrapingRoyaleAPI(CLAN_ID, df_discord_data)
     
     df_players_data = RoyaleAPI_scraper.run()
     

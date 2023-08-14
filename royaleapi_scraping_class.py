@@ -25,7 +25,7 @@ class ScrapingRoyaleAPI:
         self.get_clan_data()
         
         self.get_players_data()
-        
+
         self.get_players_discords_matches()
         
         return(self.df_players_data)
@@ -42,7 +42,7 @@ class ScrapingRoyaleAPI:
         
         self.day = self.soup.find_all('div',class_="day")[0].get_text().strip('\n')
         
-        self.medals = self.soup.select("#page_content > div.ui.attached.container.sidemargin0.content_container > div:nth-child(2) > div > a.clan.row.active_clan > div.outline.cw2__standing_outline > div.item.value.medal")[0].text.strip('\n')[2:]
+        self.medals = self.soup.select("#page_content > div.ui.attached.container.sidemargin0.content_container > div:nth-child(2) > div > a.clan.row.active_clan > div.outline.cw2__standing_outline > div.item.value.medal")[0].text.strip('\n')[2:].strip('-')
         
         self.medals_avg = self.soup.select("#page_content > div.ui.attached.container.sidemargin0.content_container > div:nth-child(2) > div > a.clan.row.active_clan > div.outline.cw2__standing_outline > div.item.value.medal_avg")[0].text.strip('\n')
         
