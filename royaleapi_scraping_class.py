@@ -11,15 +11,15 @@ def calculate_match_percentage(name1, name2):
     return round(similarity, 3)
 
 class ScrapingRoyaleAPI:
-    def __init__(self, clan_id, df_discord_data):
+    def __init__(self, clan_id):
         
         self.session=HTMLSession()
         
         self.clan_id = clan_id
         
-    def run(self, df_players_data):
+    def run(self, df_discord_data):
 
-        self.df_players_data = df_players_data
+        self.df_discord_data = df_discord_data
         
         self.get_soup()
         
