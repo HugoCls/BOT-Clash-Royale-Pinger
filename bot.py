@@ -87,8 +87,6 @@ async def attacks(ctx):
     
     df_discord_data = pd.DataFrame(user_info)
     
-    print(df_discord_data)
-    
     RoyaleAPI_scraper = ScrapingRoyaleAPI(CLAN_ID, df_discord_data)
     
     df_players_data = RoyaleAPI_scraper.run()
