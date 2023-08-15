@@ -3,7 +3,9 @@ import pandas as pd
 from royaleapi_scraping_class import ScrapingRoyaleAPI
 from discord import app_commands
 
-TOKEN = "MTEzOTk1NTAxOTc4NTk2MTU1Mg.GRziG1.okuLmjskQZ6S9WJLVRcfX-mvFgC6uWkiH_wh4g"
+with open('data/token.txt') as f:
+    TOKEN = f.read()
+
 SERVER_ID = 913101617639862362
 CLAN_ID = "UURJ9CG"
 
