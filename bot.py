@@ -2,12 +2,11 @@ import discord
 import pandas as pd
 from royaleapi_scraping_class import ScrapingRoyaleAPI
 from discord import app_commands
+from security import sensitive_data
 
-with open('data/token.txt') as f:
-    TOKEN = f.read()
-
-SERVER_ID = 913101617639862362
-CLAN_ID = "UURJ9CG"
+TOKEN = sensitive_data["discord_token"]
+SERVER_ID = sensitive_data["discord_server_id"]
+CLAN_ID = sensitive_data["clan_id"]
 
 intents = discord.Intents.all()
 intents.members = True
