@@ -4,7 +4,7 @@ ARG SERVER_ID
 ARG CLAN_ID
 ARG MIN_RATIO
 
-FROM python3:3.12.3
+FROM python:3.10-slim
 
 WORKDIR /usr/src/app
 
