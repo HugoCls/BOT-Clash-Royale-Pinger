@@ -6,6 +6,8 @@ import Levenshtein
 import concurrent.futures
 import logging as log
 
+log.basicConfig(level=log.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 def calculate_match_percentage(name1, name2):
     # Convertir les noms en minuscules
     name1 = name1.lower()
