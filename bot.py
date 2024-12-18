@@ -3,14 +3,14 @@ import pandas as pd
 from royaleapi_scraping_class import ScrapingRoyaleAPI
 from leaderboard import generate_leaderboard, get_missed_attacks_logs
 from discord import app_commands
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import os
 import time
 import json
 
 last_save_time = None
 
-load_dotenv()
+#load_dotenv()
 
 TOKEN = os.getenv("TOKEN")
 SERVER_ID = int(os.getenv("SERVER_ID"))
