@@ -208,7 +208,7 @@ class ScrapingRoyaleAPI:
         self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "cw_last_scores"] = [str(_data)]     
 
 
-    def log.info_clan_data(self):
+    def print_clan_data(self):
         """
         log.infos the clan data collected in a readable format.
         """
