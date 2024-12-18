@@ -7,6 +7,7 @@ import os
 import time
 import json
 import asyncio
+import logging as log
 
 last_save_time = None
 
@@ -36,7 +37,7 @@ def save_last_save_time(current_time):
 
 
 def save_discord_data(client):
-    print("Saving discord data")
+    log.info("Saving discord data")
     guild = client.get_guild(SERVER_ID)
     members = guild.members
 
@@ -59,7 +60,7 @@ def save_discord_data(client):
 
 
 def save_deep_cr_data():
-    print("Saving deep cr_data")
+    log.info("Saving deep cr_data")
     RoyaleAPI_scraper = ScrapingRoyaleAPI("UURJ9CG", pd.read_csv("data/discord.csv"))
 
     RoyaleAPI_scraper.get_soup()
@@ -78,7 +79,7 @@ def save_deep_cr_data():
 @client.event
 async def on_ready():
     await tree.sync(guild=discord.Object(id=SERVER_ID))
-    print("Logged in as Clash Royale Pinger!")
+    log.info("Logged in as Clash Royale Pinger!")
 
 
 @tree.command(name="save_data", description="Save all needed data for other functions", guild=discord.Object(id=SERVER_ID))
@@ -99,7 +100,7 @@ async def save_data(ctx):
         save_deep_cr_data()
         save_last_save_time(current_time)
     except:
-        print("Something went wrong")
+        log.info("Something went wrong")
 
     await ctx.followup.send(content="Data saved!")
 

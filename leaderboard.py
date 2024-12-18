@@ -28,8 +28,8 @@ def generate_leaderboard(df_players_data, last_n_weeks=5):
         avg_decks_used = round(player_data_df['decks_used'].mean(), 5)
         avg_clan_rank = round(player_data_df['clan_rank'].mean(), 1)
         
-        print(cr_name)
-        print(player_data_df)
+        log.info(cr_name)
+        log.info(player_data_df)
 
         leaderboard_data.append({
             'cr_id': cr_id,
@@ -148,4 +148,4 @@ if __name__ == "__main__":
     embeds = get_missed_attacks_logs(df_players_data)
 
     for embed in embeds:
-        print(embed.fields)
+        log.info(embed.fields)

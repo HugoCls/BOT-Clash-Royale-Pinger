@@ -4,6 +4,7 @@ import pandas as pd
 import re
 import Levenshtein
 import concurrent.futures
+import logging as log
 
 def calculate_match_percentage(name1, name2):
     # Convertir les noms en minuscules
@@ -110,7 +111,7 @@ class ScrapingRoyaleAPI:
         Determines the best matching Discord IDs for each player based on their pseudonyms.
         Modifies the DataFrame in-place to update with matched Discord names, IDs, and ratios.
         """
-        #print("Determining which discord ids are the best for these pseudos")
+        #log.info("Determining which discord ids are the best for these pseudos")
 
         for player_index in self.df_players_data.index:
             cr_name = self.df_players_data.at[player_index, "cr_name"]
@@ -136,7 +137,7 @@ class ScrapingRoyaleAPI:
 
 
     def get_players_advanced_stats(self):
-        print("Saving players advanced stats")
+        log.info("Saving players advanced stats")
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(self.get_player_advanced_stats, self.df_players_data.at[player_index, "cr_id"])
@@ -147,14 +148,14 @@ class ScrapingRoyaleAPI:
                 try:
                     future.result()
                 except Exception as e:
-                    print(f"{e}")
+                    log.info(f"{e}")
 
 
 
     def get_player_advanced_stats(self, cr_id):
         
         r = self.session.get(f'https://royaleapi.com/player/{cr_id.replace("#","").lower()}/')
-        print(f"{cr_id}: {r.status_code} {r.reason}")
+        log.info(f"{cr_id}: {r.status_code} {r.reason}")
         token = re.search("token: '(.+)'", r.text).group(1).replace('\n','').replace(' ','')
 
         headers = {
@@ -207,18 +208,18 @@ class ScrapingRoyaleAPI:
         self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "cw_last_scores"] = [str(_data)]     
 
 
-    def print_clan_data(self):
+    def log.info_clan_data(self):
         """
-        Prints the clan data collected in a readable format.
+        log.infos the clan data collected in a readable format.
         """
-        print("Clan Data:")
-        print(f"  Day: {self.day}")
-        print(f"  Clan Name: {self.clan_name}")
-        print(f"  Total Medals: {self.medals}")
-        print(f"  Average Medals: {self.medals_avg}")
-        print(f"  Decks Used Today: {self.decks_used_today}")
-        print(f"  Decks Remaining: {self.decks_remaining}")
-        print(f"  Slots: {self.slots}")
+        log.info("Clan Data:")
+        log.info(f"  Day: {self.day}")
+        log.info(f"  Clan Name: {self.clan_name}")
+        log.info(f"  Total Medals: {self.medals}")
+        log.info(f"  Average Medals: {self.medals_avg}")
+        log.info(f"  Decks Used Today: {self.decks_used_today}")
+        log.info(f"  Decks Remaining: {self.decks_remaining}")
+        log.info(f"  Slots: {self.slots}")
 
 
 if __name__ == "__main__":
