@@ -5,6 +5,7 @@ import re
 import Levenshtein
 import concurrent.futures
 import logging as log
+import traceback
 
 log.basicConfig(level=log.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -155,59 +156,64 @@ class ScrapingRoyaleAPI:
 
 
     def get_player_advanced_stats(self, cr_id):
-        
-        r = self.session.get(f'https://royaleapi.com/player/{cr_id.replace("#","").lower()}/')
-        log.info(f"{cr_id}: {r.status_code} {r.reason}")
-        token = re.search("token: '(.+)'", r.text).group(1).replace('\n','').replace(' ','')
+        try:
+            r = self.session.get(f'https://royaleapi.com/player/{cr_id.replace("#","").lower()}/')
+            
+            token = re.search("token: '(.+)'", r.text).group(1).replace('\n','').replace(' ','')
 
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Sec-Ch-Ua-Platform": '"Windows"',
-            "Accept-Language": "fr-FR,fr;q=0.9",
-            "Sec-Ch-Ua": '"Chromium";v="131", "Not_A Brand";v="24"',
-            "Sec-Ch-Ua-Mobile": "?0",
-            "Newrelic": "eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6IjI0MTI2MDkiLCJhcCI6IjE3NDM4ODI5MCIsImlkIjoiZDFiMGY5M2Y2NTExN2JlOSIsInRyIjoiY2NmNTAwMTJiMGQ2NWVjODI2NjQxYTQ1OWRhMzk5NTAiLCJ0aSI6MTczNDI3NDg2MDcyMH19",
-            "Traceparent": "00-ccf50012b0d65ec826641a459da39950-d1b0f93f65117be9-01",
-            "X-Requested-With": "XMLHttpRequest",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.6778.86 Safari/537.36",
-            "Accept": "*/*",
-            "Tracestate": "2412609@nr=0-1-2412609-174388290-d1b0f93f65117be9----1734274860720",
-            "Sec-Fetch-Site": "same-origin",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Dest": "empty",
-            "Referer": "https://royaleapi.com/player/YLLVYYRU",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Priority": "u=1, i"
-        }
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Sec-Ch-Ua-Platform": '"Windows"',
+                "Accept-Language": "fr-FR,fr;q=0.9",
+                "Sec-Ch-Ua": '"Chromium";v="131", "Not_A Brand";v="24"',
+                "Sec-Ch-Ua-Mobile": "?0",
+                "Newrelic": "eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6IjI0MTI2MDkiLCJhcCI6IjE3NDM4ODI5MCIsImlkIjoiZDFiMGY5M2Y2NTExN2JlOSIsInRyIjoiY2NmNTAwMTJiMGQ2NWVjODI2NjQxYTQ1OWRhMzk5NTAiLCJ0aSI6MTczNDI3NDg2MDcyMH19",
+                "Traceparent": "00-ccf50012b0d65ec826641a459da39950-d1b0f93f65117be9-01",
+                "X-Requested-With": "XMLHttpRequest",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.6778.86 Safari/537.36",
+                "Accept": "*/*",
+                "Tracestate": "2412609@nr=0-1-2412609-174388290-d1b0f93f65117be9----1734274860720",
+                "Sec-Fetch-Site": "same-origin",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Dest": "empty",
+                "Referer": "https://royaleapi.com/player/YLLVYYRU",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Priority": "u=1, i"
+            }
 
-        r = self.session.get(f'https://royaleapi.com/player/cw2_history/{cr_id.replace("#","").lower()}', headers=headers)
+            r = self.session.get(f'https://royaleapi.com/player/cw2_history/{cr_id.replace("#","").lower()}', headers=headers)
 
-        player_data = pd.DataFrame(r.json()["rows"])
+            player_data = pd.DataFrame(r.json()["rows"])
 
-        # Supprimer les lignes contenant des NaN dans les colonnes spécifiques avant conversion
-        player_data = player_data.dropna(subset=['contribution', 'decks_used', 'clan_rank'])
+            # Supprimer les lignes contenant des NaN dans les colonnes spécifiques avant conversion
+            player_data = player_data.dropna(subset=['contribution', 'decks_used', 'clan_rank'])
 
-        # Convertir les colonnes en numérique et gérer les erreurs
-        player_data['contribution'] = pd.to_numeric(player_data['contribution'], errors='coerce')
-        player_data['decks_used'] = pd.to_numeric(player_data['decks_used'], errors='coerce')
-        player_data['clan_rank'] = pd.to_numeric(player_data['clan_rank'], errors='coerce')
+            # Convertir les colonnes en numérique et gérer les erreurs
+            player_data['contribution'] = pd.to_numeric(player_data['contribution'], errors='coerce')
+            player_data['decks_used'] = pd.to_numeric(player_data['decks_used'], errors='coerce')
+            player_data['clan_rank'] = pd.to_numeric(player_data['clan_rank'], errors='coerce')
 
-        # Supprimer les lignes où des NaN sont encore présents après conversion
-        player_data = player_data.dropna(subset=['contribution', 'decks_used', 'clan_rank'])
+            # Supprimer les lignes où des NaN sont encore présents après conversion
+            player_data = player_data.dropna(subset=['contribution', 'decks_used', 'clan_rank'])
 
-        # Calcul des moyennes avec arrondi à 2 décimales
-        avg_contribution = round(player_data['contribution'].mean(), 2) if not player_data['contribution'].isna().all() else None
-        avg_decks_used = round(player_data['decks_used'].mean(), 2) if not player_data['decks_used'].isna().all() else None
-        avg_clan_rank = round(player_data['clan_rank'].mean(), 2) if not player_data['clan_rank'].isna().all() else None
-        
-        self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "avg_contribution"] = [str(avg_contribution)]
-        self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "avg_decks_used"] = [str(avg_decks_used)]
-        self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "avg_clan_rank"] = [str(avg_clan_rank)]
+            # Calcul des moyennes avec arrondi à 2 décimales
+            avg_contribution = round(player_data['contribution'].mean(), 2) if not player_data['contribution'].isna().all() else None
+            avg_decks_used = round(player_data['decks_used'].mean(), 2) if not player_data['decks_used'].isna().all() else None
+            avg_clan_rank = round(player_data['clan_rank'].mean(), 2) if not player_data['clan_rank'].isna().all() else None
+            
+            self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "avg_contribution"] = [str(avg_contribution)]
+            self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "avg_decks_used"] = [str(avg_decks_used)]
+            self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "avg_clan_rank"] = [str(avg_clan_rank)]
 
-        # Ajout des données des scores
-        _data = r.json()["rows"]
-        _data = [{key: value for key, value in d.items() if key in ["contribution", "decks_used", "clan_rank", "log_date"]} for d in _data]
-        self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "cw_last_scores"] = [str(_data)]     
+            # Ajout des données des scores
+            _data = r.json()["rows"]
+            _data = [{key: value for key, value in d.items() if key in ["contribution", "decks_used", "clan_rank", "log_date"]} for d in _data]
+            self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "cw_last_scores"] = [str(_data)]  
+            log.error(f"{cr_id} went well: avg_contribution:{avg_contribution}, avg_decks_used:{avg_decks_used}, avg_clan_rank:{avg_clan_rank}")
+             
+        except Exception as e:
+            log.error(f"Something went wrong with {cr_id}: {str(e)}")
+            log.error(f"Traceback: {traceback.format_exc()}")
 
 
     def print_clan_data(self):
