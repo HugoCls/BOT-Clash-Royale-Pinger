@@ -1,5 +1,5 @@
 discord
-pandas==1.5.3
+pandas
 requests_html
 bs4
 Levenshtein
