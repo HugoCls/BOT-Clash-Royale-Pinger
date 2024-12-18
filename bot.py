@@ -3,14 +3,12 @@ import pandas as pd
 from royaleapi_scraping_class import ScrapingRoyaleAPI
 from leaderboard import generate_leaderboard, get_missed_attacks_logs
 from discord import app_commands
-#from dotenv import load_dotenv
 import os
 import time
 import json
+import asyncio
 
 last_save_time = None
-
-#load_dotenv()
 
 TOKEN = os.getenv("TOKEN")
 SERVER_ID = int(os.getenv("SERVER_ID"))
@@ -83,28 +81,31 @@ async def on_ready():
 
 @tree.command(name="save_data", description="Save all needed data for other functions", guild=discord.Object(id=SERVER_ID))
 async def save_data(ctx):
+    await ctx.response.defer()
+
     current_time = time.time()
     last_save_time = get_last_save_time()
 
     if last_save_time is not None and current_time - last_save_time < 300:
         remaining_time = 300 - (current_time - last_save_time)
         minutes, seconds = divmod(int(remaining_time), 60)
-        await ctx.response.send_message(content=f"Please wait {minutes} minute(s) and {seconds} second(s) before saving the data again.")
+        await ctx.followup.send(content=f"Please wait {minutes} minute(s) and {seconds} second(s) before saving the data again.")
         return
 
     try:
         save_discord_data(client)
         save_deep_cr_data()
-        
         save_last_save_time(current_time)
     except:
         pass
 
-    await ctx.response.send_message(content="Data saved!")   
+    await ctx.followup.send(content="Data saved!")
 
 
 @tree.command(name="correspondances", description="Know which CR player is related to which discord id", guild=discord.Object(id=SERVER_ID))
 async def correspondances(ctx):
+    await ctx.response.defer()
+
     guild = client.get_guild(SERVER_ID)
     members = guild.members
     
@@ -153,11 +154,11 @@ async def correspondances(ctx):
             
             embed.add_field(name=embed_name, value=embed_value, inline=False)
         
-    await ctx.response.send_message(embed=embed)
+    await ctx.followup.send(embed=embed)
 
 
 @tree.command(name="leaderboard", description="Shows clan leaderboard", guild=discord.Object(id=SERVER_ID))
-@app_commands.describe(last_n_weeks="Number of weeks to include in the leaderboard")  # Utilisation du tiret au lieu de _
+@app_commands.describe(last_n_weeks="Number of weeks to include in the leaderboard")  
 async def leaderboard(ctx, last_n_weeks: int):
     await ctx.response.defer()
 
@@ -170,7 +171,7 @@ async def leaderboard(ctx, last_n_weeks: int):
 
 
 @tree.command(name="oublis", description="Shows forgotten battles from players in clan wars", guild=discord.Object(id=SERVER_ID))
-@app_commands.describe(last_n_weeks="Number of weeks to include in the logs")  # Utilisation du tiret au lieu de _
+@app_commands.describe(last_n_weeks="Number of weeks to include in the logs")  
 async def oublis(ctx, last_n_weeks: int):
     await ctx.response.defer()
 
@@ -184,7 +185,8 @@ async def oublis(ctx, last_n_weeks: int):
 
 @tree.command(name="attacks", description="Identify GDC players", guild=discord.Object(id=SERVER_ID))
 async def attacks(ctx):
-    
+    await ctx.response.defer()
+
     df_discord_data = save_discord_data(client)
     
     RoyaleAPI_scraper = ScrapingRoyaleAPI(CLAN_ID, df_discord_data)
@@ -227,6 +229,6 @@ async def attacks(ctx):
             
             embed.add_field(name=embed_name, value=embed_value, inline=False)
         
-    await ctx.response.send_message(embed=embed)
+    await ctx.followup.send(embed=embed)
 
 client.run(TOKEN)
