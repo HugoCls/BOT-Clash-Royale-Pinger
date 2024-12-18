@@ -12,6 +12,8 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
+RUN mkdir -p data
+
 COPY . .
 
 # Pass the arguments as environment variables inside the container (optional)
