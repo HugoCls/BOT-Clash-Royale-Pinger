@@ -3,3 +3,4 @@ pandas
 requests_html==0.10.0
 bs4
 Levenshtein
+lxml[html_clean]
