@@ -1,5 +1,5 @@
 discord
 pandas
-requests_html=0.10.0
+requests_html==0.10.0
 bs4
 Levenshtein
