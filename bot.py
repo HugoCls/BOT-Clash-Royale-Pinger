@@ -36,6 +36,7 @@ def save_last_save_time(current_time):
 
 
 def save_discord_data(client):
+    print("Saving discord data")
     guild = client.get_guild(SERVER_ID)
     members = guild.members
 
@@ -58,6 +59,7 @@ def save_discord_data(client):
 
 
 def save_deep_cr_data():
+    print("Saving deep cr_data")
     RoyaleAPI_scraper = ScrapingRoyaleAPI("UURJ9CG", pd.read_csv("data/discord.csv"))
 
     RoyaleAPI_scraper.get_soup()
@@ -97,7 +99,7 @@ async def save_data(ctx):
         save_deep_cr_data()
         save_last_save_time(current_time)
     except:
-        pass
+        print("Something went wrong")
 
     await ctx.followup.send(content="Data saved!")
 

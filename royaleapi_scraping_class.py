@@ -136,6 +136,7 @@ class ScrapingRoyaleAPI:
 
 
     def get_players_advanced_stats(self):
+        print("Saving players advanced stats")
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(self.get_player_advanced_stats, self.df_players_data.at[player_index, "cr_id"])
@@ -153,7 +154,7 @@ class ScrapingRoyaleAPI:
     def get_player_advanced_stats(self, cr_id):
         
         r = self.session.get(f'https://royaleapi.com/player/{cr_id.replace("#","").lower()}/')
-
+        print(f"{cr_id}: {r.status_code} {r.reason}")
         token = re.search("token: '(.+)'", r.text).group(1).replace('\n','').replace(' ','')
 
         headers = {
