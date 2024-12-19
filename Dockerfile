@@ -22,4 +22,5 @@ ENV SERVER_ID=${SERVER_ID}
 ENV CLAN_ID=${CLAN_ID}
 ENV MIN_RATIO=${MIN_RATIO}
 
-CMD ["python3", "bot.py"]
+# Use a script to launch both the bot and the API
+CMD ["sh", "-c", "python3 bot.py & python3 api.py"]

@@ -10,4 +10,4 @@ RoyaleAPI_scraper.get_players_data()
 
 RoyaleAPI_scraper.get_players_advanced_stats()
 
-RoyaleAPI_scraper.df_players_data.to_csv("data/results.csv")
+RoyaleAPI_scraper.df_players_data.to_csv("data/players_advanced_stats.csv")

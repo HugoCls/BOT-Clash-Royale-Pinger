@@ -138,7 +138,6 @@ class ScrapingRoyaleAPI:
             self.df_players_data.at[player_index, "discord_id"] = best_match_disc_id
             self.df_players_data.at[player_index, "match_ratio"] = best_match_ratio
 
-
     def get_players_advanced_stats(self):
         log.info("Saving players advanced stats")
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -152,37 +151,33 @@ class ScrapingRoyaleAPI:
                     future.result()
                 except Exception as e:
                     log.info(f"{e}")
-
-
+                    
 
     def get_player_advanced_stats(self, cr_id):
         try:
             r = self.session.get(f'https://royaleapi.com/player/{cr_id.replace("#","").lower()}/')
             
             token = re.search("token: '(.+)'", r.text).group(1).replace('\n','').replace(' ','')
-
+            cookies = r.cookies
+            
             headers = {
-                "Authorization": f"Bearer {token}",
-                "Sec-Ch-Ua-Platform": '"Windows"',
-                "Accept-Language": "fr-FR,fr;q=0.9",
-                "Sec-Ch-Ua": '"Chromium";v="131", "Not_A Brand";v="24"',
-                "Sec-Ch-Ua-Mobile": "?0",
-                "Newrelic": "eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6IjI0MTI2MDkiLCJhcCI6IjE3NDM4ODI5MCIsImlkIjoiZDFiMGY5M2Y2NTExN2JlOSIsInRyIjoiY2NmNTAwMTJiMGQ2NWVjODI2NjQxYTQ1OWRhMzk5NTAiLCJ0aSI6MTczNDI3NDg2MDcyMH19",
-                "Traceparent": "00-ccf50012b0d65ec826641a459da39950-d1b0f93f65117be9-01",
-                "X-Requested-With": "XMLHttpRequest",
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.6778.86 Safari/537.36",
                 "Accept": "*/*",
-                "Tracestate": "2412609@nr=0-1-2412609-174388290-d1b0f93f65117be9----1734274860720",
-                "Sec-Fetch-Site": "same-origin",
-                "Sec-Fetch-Mode": "cors",
-                "Sec-Fetch-Dest": "empty",
+                "Accept-Language": "fr-FR,fr;q=0.9",
+                #"Accept-Encoding": "gzip, deflate, br",
                 "Referer": "https://royaleapi.com/player/YLLVYYRU",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Priority": "u=1, i"
+                "Authorization": f"Bearer {token}",
+                "X-Requested-With": "XMLHttpRequest",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "Priority": "u=1, i",
+                "Te": "trailers",
+                "Connection": "keep-alive"
             }
 
-            r = self.session.get(f'https://royaleapi.com/player/cw2_history/{cr_id.replace("#","").lower()}', headers=headers)
-
+            r = self.session.get(f'https://royaleapi.com/player/cw2_history/{cr_id.replace("#","").lower()}', cookies=cookies, headers=headers)
+            
             player_data = pd.DataFrame(r.json()["rows"])
 
             # Supprimer les lignes contenant des NaN dans les colonnes spécifiques avant conversion
@@ -200,16 +195,18 @@ class ScrapingRoyaleAPI:
             avg_contribution = round(player_data['contribution'].mean(), 2) if not player_data['contribution'].isna().all() else None
             avg_decks_used = round(player_data['decks_used'].mean(), 2) if not player_data['decks_used'].isna().all() else None
             avg_clan_rank = round(player_data['clan_rank'].mean(), 2) if not player_data['clan_rank'].isna().all() else None
-            
+            avg_real_contribution = round(player_data.loc[~((player_data['decks_used'] >= 16) & (player_data['contribution'] < 1800)), 'contribution'].mean(), 2) if not player_data['contribution'].isna().all() else None
+
             self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "avg_contribution"] = [str(avg_contribution)]
+            self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "avg_real_contribution"] = [str(avg_real_contribution)]
             self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "avg_decks_used"] = [str(avg_decks_used)]
             self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "avg_clan_rank"] = [str(avg_clan_rank)]
-
+            
             # Ajout des données des scores
             _data = r.json()["rows"]
-            _data = [{key: value for key, value in d.items() if key in ["contribution", "decks_used", "clan_rank", "log_date"]} for d in _data]
+            _data = [{key: value for key, value in d.items() if key in ["contribution","decks_used", "clan_rank", "log_date"]} for d in _data]
             self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "cw_last_scores"] = [str(_data)]  
-            log.error(f"{cr_id} went well: avg_contribution:{avg_contribution}, avg_decks_used:{avg_decks_used}, avg_clan_rank:{avg_clan_rank}")
+            log.error(f"{cr_id} went well: avg_contribution:{avg_contribution}, avg_real_contribution: {avg_real_contribution}, avg_decks_used:{avg_decks_used}, avg_clan_rank:{avg_clan_rank}")
              
         except Exception as e:
             log.error(f"Something went wrong with {cr_id}: {str(e)}")
@@ -242,4 +239,4 @@ if __name__ == "__main__":
 
     RoyaleAPI_scraper.get_players_advanced_stats()
 
-    RoyaleAPI_scraper.df_players_data.to_csv("data/results.csv")
+    RoyaleAPI_scraper.df_players_data.to_csv("data/players_advanced_stats.csv")

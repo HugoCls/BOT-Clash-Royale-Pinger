@@ -1,6 +1,9 @@
 discord
 pandas
-requests_html==0.10.0
+#requests_html==0.10.0
 bs4
 Levenshtein
-lxml_html_clean
+#lxml_html_clean
+httpx
+uvicorn
+fastapi

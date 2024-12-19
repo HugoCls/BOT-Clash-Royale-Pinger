@@ -8,6 +8,9 @@ import time
 import json
 import asyncio
 import logging as log
+# from dotenv import load_dotenv
+
+# load_dotenv()
 
 log.basicConfig(level=log.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -26,6 +29,12 @@ tree = app_commands.CommandTree(client)
 
 
 def get_last_save_time():
+    """
+    Lit le fichier `save_time.json` pour obtenir l'heure du dernier enregistrement des données.
+
+    Retourne :
+        - last_save_time (float): Heure de la dernière sauvegarde sous forme de timestamp.
+    """
     try:
         with open(SAVE_TIME_FILE, "r") as f:
             data = json.load(f)
@@ -34,11 +43,28 @@ def get_last_save_time():
         return None
 
 def save_last_save_time(current_time):
+    """
+    Sauvegarde l'heure actuelle dans le fichier `save_time.json` pour référence future.
+    
+    Arguments :
+        - current_time (float): L'heure actuelle sous forme de timestamp.
+    """
     with open(SAVE_TIME_FILE, "w") as f:
         json.dump({"last_save_time": current_time}, f)
 
 
 def save_discord_data(client):
+    """
+    Sauvegarde les données des membres Discord dans un fichier CSV.
+
+    Effectue un scan actif des membres du serveur Discord et récupère les informations nécessaires.
+
+    Arguments :
+        - client (discord.Client): Instance du client Discord.
+
+    Retourne :
+        - df_discord_data (pandas.DataFrame): DataFrame contenant les données des membres Discord.
+    """
     log.info("Saving discord data")
     guild = client.get_guild(SERVER_ID)
     members = guild.members
@@ -61,7 +87,38 @@ def save_discord_data(client):
     return df_discord_data
 
 
+def save_cr_data():
+    """
+    Sauvegarde les données de Clash Royale des joueurs dans un fichier CSV.
+
+    Effectue un scan actif des données de clan et des joueurs à partir de RoyaleAPI.
+
+    Retourne :
+        - RoyaleAPI_scraper (ScrapingRoyaleAPI): Instance de la classe `ScrapingRoyaleAPI` utilisée pour l'extraction des données.
+    """
+    log.info("Saving deep cr_data")
+    RoyaleAPI_scraper = ScrapingRoyaleAPI("UURJ9CG", pd.read_csv("data/discord.csv"))
+
+    RoyaleAPI_scraper.get_soup()
+        
+    RoyaleAPI_scraper.get_clan_data()
+    
+    RoyaleAPI_scraper.get_players_data()
+
+    RoyaleAPI_scraper.df_players_data.to_csv("data/players_stats.csv")
+
+    return RoyaleAPI_scraper
+
+
 def save_deep_cr_data():
+    """
+    Sauvegarde des données de Clash Royale des joueurs de manière approfondie dans un fichier CSV.
+
+    Effectue un scan actif des données de clan, des joueurs et des statistiques avancées via RoyaleAPI.
+
+    Retourne :
+        - df_players_data (pandas.DataFrame): DataFrame contenant les données des joueurs extraites.
+    """
     log.info("Saving deep cr_data")
     RoyaleAPI_scraper = ScrapingRoyaleAPI("UURJ9CG", pd.read_csv("data/discord.csv"))
 
@@ -73,19 +130,36 @@ def save_deep_cr_data():
 
     RoyaleAPI_scraper.get_players_advanced_stats()
 
-    RoyaleAPI_scraper.df_players_data.to_csv("data/results.csv")
+    RoyaleAPI_scraper.df_players_data.to_csv("data/players_stats.csv")
 
     return RoyaleAPI_scraper.df_players_data
 
 
 @client.event
 async def on_ready():
+    """
+    Gère l'événement lorsque le bot se connecte à Discord.
+
+    Synchronise les commandes avec le serveur et enregistre un message de connexion dans les logs.
+    """
     await tree.sync(guild=discord.Object(id=SERVER_ID))
     log.info("Logged in as Clash Royale Pinger!")
 
 
 @tree.command(name="save_data", description="Save all needed data for other functions", guild=discord.Object(id=SERVER_ID))
 async def save_data(ctx):
+    """
+    Sauvegarde toutes les données nécessaires pour d'autres fonctions du bot.
+
+    Type : ACTIVE (cr+discord)
+    
+    Arguments :
+        - ctx (discord.Interaction): L'interaction qui a déclenché la commande.
+
+    Retourne :
+        - Un message de confirmation dans Discord si les données ont été sauvegardées avec succès, 
+          ou un message d'attente si une sauvegarde a eu lieu récemment.
+    """
     await ctx.response.defer()
 
     current_time = time.time()
@@ -109,30 +183,25 @@ async def save_data(ctx):
 
 @tree.command(name="correspondances", description="Know which CR player is related to which discord id", guild=discord.Object(id=SERVER_ID))
 async def correspondances(ctx):
+    """
+    Affiche les correspondances entre les joueurs de Clash Royale et leurs IDs Discord.
+
+    Type : ACTIVE (cr+discord)
+
+    Arguments :
+        - ctx (discord.Interaction): L'interaction qui a déclenché la commande.
+
+    Retourne :
+        - Un embed Discord affichant les correspondances avec un ratio de correspondance.
+    """
     await ctx.response.defer()
+    
+    df_discord_data = save_discord_data()
+    
+    RoyaleAPI_Scraper = save_cr_data()
 
-    guild = client.get_guild(SERVER_ID)
-    members = guild.members
+    df_players_data = RoyaleAPI_Scraper.df_players_data
     
-    user_info = []
-    
-    for member in members:
-        user_info.append({
-            "name": member.name,
-            "discord_id": member.id,
-            "nickname": member.nick,
-            "global_name": member.global_name,
-            "discord_name": member.nick or member.global_name or member.name,
-        })
-    
-    df_discord_data = pd.DataFrame(user_info)
-    
-    RoyaleAPI_scraper = ScrapingRoyaleAPI("UURJ9CG", df_discord_data)
-    
-    RoyaleAPI_scraper.run()
-    
-    df_players_data = RoyaleAPI_scraper.df_players_data
-
     df_players_data = df_players_data.astype(str)
     
     embed = discord.Embed(title="Discord & Clash Royale",description="Correspondances", colour=discord.Colour(0x3e038c))
@@ -165,9 +234,21 @@ async def correspondances(ctx):
 @tree.command(name="leaderboard", description="Shows clan leaderboard", guild=discord.Object(id=SERVER_ID))
 @app_commands.describe(last_n_weeks="Number of weeks to include in the leaderboard")  
 async def leaderboard(ctx, last_n_weeks: int):
+    """
+    Affiche le leaderboard des joueurs de Clash Royale du clan.
+
+    Type : PASSIVE (cr)
+
+    Arguments :
+        - ctx (discord.Interaction): L'interaction qui a déclenché la commande.
+        - last_n_weeks (int): Nombre de semaines à inclure dans le leaderboard.
+
+    Retourne :
+        - Un ou plusieurs embeds Discord contenant le leaderboard des joueurs.
+    """
     await ctx.response.defer()
 
-    df_players_data = pd.read_csv('data/results.csv')
+    df_players_data = pd.read_csv('data/players_advanced_stats.csv')
 
     embeds = generate_leaderboard(df_players_data, last_n_weeks)
 
@@ -178,9 +259,21 @@ async def leaderboard(ctx, last_n_weeks: int):
 @tree.command(name="oublis", description="Shows forgotten battles from players in clan wars", guild=discord.Object(id=SERVER_ID))
 @app_commands.describe(last_n_weeks="Number of weeks to include in the logs")  
 async def oublis(ctx, last_n_weeks: int):
+    """
+    Affiche les batailles oubliées des joueurs dans les guerres de clan.
+
+    Type : PASSIVE (cr)
+
+    Arguments :
+        - ctx (discord.Interaction): L'interaction qui a déclenché la commande.
+        - last_n_weeks (int): Nombre de semaines à inclure dans les logs.
+
+    Retourne :
+        - Un ou plusieurs embeds Discord affichant les batailles oubliées.
+    """
     await ctx.response.defer()
 
-    df_players_data = pd.read_csv('data/results.csv')
+    df_players_data = pd.read_csv('data/players_advanced_stats.csv')
 
     embeds = get_missed_attacks_logs(df_players_data, last_n_weeks)
 
@@ -190,19 +283,24 @@ async def oublis(ctx, last_n_weeks: int):
 
 @tree.command(name="attacks", description="Identify GDC players", guild=discord.Object(id=SERVER_ID))
 async def attacks(ctx):
+    """
+    Identifie les joueurs du clan qui ont des attaques restantes dans le cadre de la guerre de clans.
+
+    Type : ACTIVE (cr+discord)
+    
+    Arguments :
+        - ctx (discord.Interaction): L'interaction qui a déclenché la commande.
+
+    Retourne :
+        - Un embed Discord affichant les joueurs avec les attaques restantes.
+    """
     await ctx.response.defer()
 
-    df_discord_data = save_discord_data(client)
-    
-    RoyaleAPI_scraper = ScrapingRoyaleAPI(CLAN_ID, df_discord_data)
-    
-    RoyaleAPI_scraper.run()
+    df_discord_data = save_discord_data(client)  
+
+    RoyaleAPI_scraper = save_cr_data()
     
     df_players_data = RoyaleAPI_scraper.df_players_data
-
-    df_players_data = df_players_data.astype(str)
-    
-    df_players_data.to_csv("data/result.csv")
     
     embed = discord.Embed(title="War | "+str(RoyaleAPI_scraper.day), colour=discord.Colour(0x3e038c))
         

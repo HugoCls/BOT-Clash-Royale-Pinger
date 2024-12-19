@@ -1,7 +1,9 @@
 import discord
 import pandas as pd
 import ast
-
+import json
+from datetime import datetime
+    
 def add_day_suffix(day):
     if 10 <= day <= 20:
         suffix = 'th'
@@ -100,9 +102,14 @@ def get_missed_attacks_logs(df_players_data, last_n_weeks=5):
 
     embeds = []
 
+    with open('save_time.json', 'r') as f:
+        save_time = json.load(f)["last_save_time"]
+        last_update = datetime.utcfromtimestamp(save_time).strftime('%Y-%m-%d %H:%M:%S')
+
     # Créer le leaderboard pour Discord
     embed = discord.Embed(title=f"Oublis en GDC (last {last_n_weeks} weeks)", colour=discord.Colour(0xf54242))
-
+    embed.add_field(name="Data last updated:", value=last_update, inline=True)
+    
     def choose_smile(forgotten_battles):
         if forgotten_battles <= 1:
             return "<:2222:913184619145334784>"
@@ -138,14 +145,3 @@ def get_missed_attacks_logs(df_players_data, last_n_weeks=5):
     
     embeds.append(embed)
     return embeds
-
-
-if __name__ == "__main__":
-    df_players_data = pd.read_csv('data/results.csv')
-
-    #embed = generate_leaderboard(df_players_data)
-
-    embeds = get_missed_attacks_logs(df_players_data)
-
-    for embed in embeds:
-        log.info(embed.fields)
