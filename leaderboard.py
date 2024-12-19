@@ -34,8 +34,10 @@ def generate_leaderboard(df_players_data, last_n_weeks=5):
 
         # Calcul des moyennes avec arrondi à 2 décimales
         avg_contribution = round(player_data_df['contribution'].mean(), 2)
+        avg_real_contribution = round(player_data_df.loc[~((player_data_df['decks_used'] >= 16) & (player_data_df['contribution'] < 1800)), 'contribution'].mean(), 2)
         avg_decks_used = round(player_data_df['decks_used'].mean(), 5)
         avg_clan_rank = round(player_data_df['clan_rank'].mean(), 1)
+        
         
         log.info(cr_name)
         log.info(player_data_df)
@@ -44,11 +46,12 @@ def generate_leaderboard(df_players_data, last_n_weeks=5):
             'cr_id': cr_id,
             'cr_name': cr_name,
             'avg_contribution': avg_contribution,
+            'avg_real_contribution': avg_real_contribution,
             'avg_decks_used': avg_decks_used
         })
     
     # Trier le leaderboard par la meilleure moyenne de contribution (en ordre décroissant)
-    leaderboard_data.sort(key=lambda x: x['avg_contribution'], reverse=True)
+    leaderboard_data.sort(key=lambda x: x['avg_real_contribution'], reverse=True)
     
     embeds = []
 
