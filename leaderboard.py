@@ -21,12 +21,12 @@ def generate_leaderboard(df_players_data, last_n_weeks=5):
     # Calculer les moyennes pour chaque joueur
     leaderboard_data = []
     
-    j = last_n_weeks if last_n_weeks <= len(df_players_data.at[player_index, "cw_last_scores"]) - 1 else -1
-            
     for player_index in df_players_data.index:
         cr_id = df_players_data.at[player_index, "cr_id"]
         cr_name = df_players_data.at[player_index, "cr_name"]
-
+        
+        j = last_n_weeks if last_n_weeks <= len(df_players_data.at[player_index, "cw_last_scores"]) - 1 else -1
+           
         player_data = ast.literal_eval(df_players_data.at[player_index, "cw_last_scores"])[:j]
 
         # Convertir la liste de dictionnaires en un DataFrame pour calculer les moyennes
