@@ -9,11 +9,11 @@ FROM python:3.10-slim
 # Set working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy requirements file to the container
-COPY requirements.txt .
-
 # Install curl
 RUN apt-get update && apt-get install -y curl
+
+# Copy requirements file to the container
+COPY requirements.txt .
 
 # Install the required Python dependencies
 RUN pip install -r requirements.txt
