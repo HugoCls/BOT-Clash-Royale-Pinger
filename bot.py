@@ -280,10 +280,13 @@ async def oublis(ctx, last_n_weeks: int):
 
     df_players_data = pd.read_csv('data/players_advanced_stats.csv')
 
-    embeds = get_missed_attacks_logs(df_players_data, last_n_weeks)
+    try:
+        embeds = get_missed_attacks_logs(df_players_data, last_n_weeks)
 
-    for embed in embeds:
-        await ctx.followup.send(embed=embed)
+        for embed in embeds:
+            await ctx.followup.send(embed=embed)
+    except:
+        await ctx.followup.send("Too many forgotten battles to display")
 
 
 @tree.command(name="attacks", description="Identify GDC players", guild=discord.Object(id=SERVER_ID))
