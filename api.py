@@ -2,6 +2,10 @@ from fastapi import FastAPI
 import logging as log
 from royaleapi_scraping_class import ScrapingRoyaleAPI
 import requests
+import time
+import json
+
+SAVE_TIME_FILE = "data/save_time.json"
 
 app = FastAPI()
 
@@ -20,6 +24,11 @@ def save_data():
     RoyaleAPI_scraper.get_players_advanced_stats()
 
     RoyaleAPI_scraper.df_players_data.to_csv("data/players_advanced_stats.csv")
+    
+    with open(SAVE_TIME_FILE, "w") as f:
+        current_time = time.time()
+        json.dump({"last_save_time": current_time}, f)
+        
     return {"message": "Data saved"}
 
 

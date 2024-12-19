@@ -135,7 +135,7 @@ def save_deep_cr_data():
 
     RoyaleAPI_scraper.get_players_advanced_stats()
 
-    RoyaleAPI_scraper.df_players_data.to_csv("data/players_stats.csv")
+    RoyaleAPI_scraper.df_players_data.to_csv("data/players_advanced_stats.csv")
 
     return RoyaleAPI_scraper.df_players_data
 
