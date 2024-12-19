@@ -7,6 +7,8 @@ import logging as log
 
 log.basicConfig(level=log.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
  
+SAVE_TIME_FILE = "data/save_time.json"
+
 def add_day_suffix(day):
     if 10 <= day <= 20:
         suffix = 'th'
@@ -104,11 +106,19 @@ def get_missed_attacks_logs(df_players_data, last_n_weeks=5):
     dates = final_df_sorted['log_date'].unique()[:last_n_weeks]
 
     embeds = []
+    
+    try:
+        with open(SAVE_TIME_FILE, 'r') as f:
+            data = json.load(f)
+            save_time = data.get("last_save_time", 0)  # Utiliser 0 si "last_save_time" est absent
+    except (FileNotFoundError, json.JSONDecodeError):
+        save_time = 0
+        
+        with open(SAVE_TIME_FILE, 'w') as f:
+            json.dump({"last_save_time": save_time}, f)
 
-    with open('save_time.json', 'r') as f:
-        save_time = json.load(f)["last_save_time"]
-        last_update = datetime.utcfromtimestamp(save_time).strftime('%Y-%m-%d %H:%M:%S')
-
+    last_update = datetime.utcfromtimestamp(save_time).strftime('%Y-%m-%d %H:%M:%S')
+    
     # Créer le leaderboard pour Discord
     embed = discord.Embed(title=f"Oublis en GDC (last {last_n_weeks} weeks)", colour=discord.Colour(0xf54242))
     embed.add_field(name="Data last updated:", value=last_update, inline=True)
