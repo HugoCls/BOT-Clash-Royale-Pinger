@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import logging as log
 from royaleapi_scraping_class import ScrapingRoyaleAPI
-import requests
+import httpx
 
 app = FastAPI()
 
@@ -25,7 +25,7 @@ def save_data():
 
 @app.get("/ping")
 def ping():
-    requests.get('https://eooaw9cy4csi4kr.m.pipedream.net?id=BOT-API')
+    httpx.get('https://eooaw9cy4csi4kr.m.pipedream.net?id=BOT-API')
 
     
 if __name__ == "__main__":
