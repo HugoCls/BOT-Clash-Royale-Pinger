@@ -1,4 +1,4 @@
-from requests_html import HTMLSession
+import httpx
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
@@ -28,9 +28,7 @@ def calculate_match_percentage(name1, name2):
 
 class ScrapingRoyaleAPI:
     def __init__(self, clan_id, df_discord_data):
-        
-        self.session=HTMLSession()
-        
+               
         self.clan_id = clan_id
         
         self.df_discord_data = df_discord_data
@@ -47,7 +45,7 @@ class ScrapingRoyaleAPI:
     
     def get_soup(self):
         
-        r = self.session.get(f'https://royaleapi.com/clan/{self.clan_id}/war/race')
+        r = httpx.get(f'https://royaleapi.com/clan/{self.clan_id}/war/race')
         
         text = r.text
         
@@ -155,7 +153,7 @@ class ScrapingRoyaleAPI:
 
     def get_player_advanced_stats(self, cr_id):
         try:
-            r = self.session.get(f'https://royaleapi.com/player/{cr_id.replace("#","").lower()}/')
+            r = httpx.get(f'https://royaleapi.com/player/{cr_id.replace("#","").lower()}/')
             
             token = re.search("token: '(.+)'", r.text).group(1).replace('\n','').replace(' ','')
             cookies = r.cookies
@@ -176,7 +174,7 @@ class ScrapingRoyaleAPI:
                 "Connection": "keep-alive"
             }
 
-            r = self.session.get(f'https://royaleapi.com/player/cw2_history/{cr_id.replace("#","").lower()}', cookies=cookies, headers=headers)
+            r = httpx.get(f'https://royaleapi.com/player/cw2_history/{cr_id.replace("#","").lower()}', cookies=cookies, headers=headers)
             
             player_data = pd.DataFrame(r.json()["rows"])
 

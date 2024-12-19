@@ -6,7 +6,6 @@ from discord import app_commands
 import os
 import time
 import json
-import asyncio
 import logging as log
 # from dotenv import load_dotenv
 
