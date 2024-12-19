@@ -1,0 +1,21 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: bot.Dockerfile  # Spécifie le chemin du Dockerfile du bot
+    environment:
+      - TOKEN=${TOKEN}
+      - SERVER_ID=${SERVER_ID}
+      - CLAN_ID=${CLAN_ID}
+      - MIN_RATIO=${MIN_RATIO}
+  api:
+    build:
+      context: .
+      dockerfile: api.Dockerfile  # Spécifie le chemin du Dockerfile de l'API
+    environment:
+      - TOKEN=${TOKEN}
+      - SERVER_ID=${SERVER_ID}
+      - CLAN_ID=${CLAN_ID}
+      - MIN_RATIO=${MIN_RATIO}
+    ports:
+      - "5000:5000"

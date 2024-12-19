@@ -27,17 +27,4 @@ ENV SERVER_ID=${SERVER_ID}
 ENV CLAN_ID=${CLAN_ID}
 ENV MIN_RATIO=${MIN_RATIO}
 
-# Install cron to manage scheduled tasks if necessary
-RUN apt-get update && apt-get install -y cron
-
-# Copy the crontab file into the container
-COPY crontab /etc/cron.d/crontab
-
-# Ensure the cron job has the right permissions
-RUN chmod 0644 /etc/cron.d/crontab
-
-# Install the cron job
-RUN crontab /etc/cron.d/crontab
-
-# Run both cron and your Python scripts (bot.py and api.py) in the same container
-CMD cron && python3 bot.py & python3 api.py
+CMD ["python3", "api.py"]

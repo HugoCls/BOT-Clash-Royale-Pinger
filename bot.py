@@ -7,9 +7,9 @@ import os
 import time
 import json
 import logging as log
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 
 log.basicConfig(level=log.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -103,6 +103,8 @@ def save_cr_data():
     RoyaleAPI_scraper.get_clan_data()
     
     RoyaleAPI_scraper.get_players_data()
+    
+    RoyaleAPI_scraper.get_players_discords_matches()
 
     RoyaleAPI_scraper.df_players_data.to_csv("data/players_stats.csv")
 
@@ -195,7 +197,7 @@ async def correspondances(ctx):
     """
     await ctx.response.defer()
     
-    df_discord_data = save_discord_data()
+    df_discord_data = save_discord_data(client)
     
     RoyaleAPI_Scraper = save_cr_data()
 
