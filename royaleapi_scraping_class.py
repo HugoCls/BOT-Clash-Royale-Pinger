@@ -6,8 +6,12 @@ import Levenshtein
 import concurrent.futures
 import logging as log
 import traceback
+import time
+import json
 
 log.basicConfig(level=log.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+SAVE_TIME_FILE = "data/save_time.json"
 
 def calculate_match_percentage(name1, name2):
     # Convertir les noms en minuscules
@@ -205,7 +209,11 @@ class ScrapingRoyaleAPI:
             _data = [{key: value for key, value in d.items() if key in ["contribution","decks_used", "clan_rank", "log_date"]} for d in _data]
             self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "cw_last_scores"] = [str(_data)]  
             log.error(f"{cr_id} went well: avg_contribution:{avg_contribution}, avg_real_contribution: {avg_real_contribution}, avg_decks_used:{avg_decks_used}, avg_clan_rank:{avg_clan_rank}")
-             
+            
+            with open(SAVE_TIME_FILE, "w") as f:
+                current_time = time.time()
+                json.dump({"last_save_time": current_time}, f)
+            
         except Exception as e:
             log.error(f"Something went wrong with {cr_id}: {str(e)}")
             log.error(f"Traceback: {traceback.format_exc()}")

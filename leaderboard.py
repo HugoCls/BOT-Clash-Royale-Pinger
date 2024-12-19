@@ -21,11 +21,13 @@ def generate_leaderboard(df_players_data, last_n_weeks=5):
     # Calculer les moyennes pour chaque joueur
     leaderboard_data = []
     
+    j = last_n_weeks if last_n_weeks <= len(df_players_data.at[player_index, "cw_last_scores"]) - 1 else -1
+            
     for player_index in df_players_data.index:
         cr_id = df_players_data.at[player_index, "cr_id"]
         cr_name = df_players_data.at[player_index, "cr_name"]
 
-        player_data = ast.literal_eval(df_players_data.at[player_index, "cw_last_scores"])[:last_n_weeks]
+        player_data = ast.literal_eval(df_players_data.at[player_index, "cw_last_scores"])[:j]
 
         # Convertir la liste de dictionnaires en un DataFrame pour calculer les moyennes
         player_data_df = pd.DataFrame(player_data)
@@ -103,7 +105,9 @@ def get_missed_attacks_logs(df_players_data, last_n_weeks=5):
     # Trier le DataFrame par 'log_date' dans l'ordre décroissant
     final_df_sorted = final_df.sort_values(by='log_date', ascending=False)
 
-    dates = final_df_sorted['log_date'].unique()[:last_n_weeks]
+    j = last_n_weeks if last_n_weeks <= len(final_df_sorted['log_date'].unique()) - 1 else -1
+    
+    dates = final_df_sorted['log_date'].unique()[:j]
 
     embeds = []
     
