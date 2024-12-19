@@ -310,6 +310,8 @@ async def attacks(ctx):
     
     df_players_data = RoyaleAPI_scraper.df_players_data
     
+    embeds = []
+    
     embed = discord.Embed(title="War | "+str(RoyaleAPI_scraper.day), colour=discord.Colour(0x3e038c))
         
     clan_stats = [
@@ -322,7 +324,7 @@ async def attacks(ctx):
     embed.add_field(name=f"**Remaining Attacks**", value='\n'.join(clan_stats), inline=False)
     
     for i in range(4):
-        
+        name_done = False
         df_i_attacks = df_players_data[df_players_data["decks_used_today"] == str(i)]
         
         if len(df_i_attacks) >= 1:
@@ -334,12 +336,24 @@ async def attacks(ctx):
             for index, row in df_i_attacks.iterrows():
                 
                 if float(row["match_ratio"]) >= float(MIN_RATIO):
-                    embed_value += f"•{row['cr_name']} <@{row['discord_id']}>\n"
+                    text = f"•{row['cr_name']} <@{row['discord_id']}>\n"
                 else:
-                    embed_value += f"•{row['cr_name']}\n"
-            
-            embed.add_field(name=embed_name, value=embed_value, inline=False)
-        
-    await ctx.followup.send(embed=embed)
+                    text = f"•{row['cr_name']}\n"
+
+                if len(embed_value) + len(text) >= 980:
+                    embed.add_field(name=embed_name, value=embed_value, inline=False)
+                    embeds.append(embed)
+                    embed = discord.Embed(colour=discord.Colour(0x3e038c))
+                    embed_value = ""
+                    name_done = True
+                    
+                embed_value += text
+                
+            embed.add_field(name=embed_name if not name_done else "", value=embed_value, inline=False)
+    
+    embeds.append(embed)
+    
+    for embed in embeds:
+        await ctx.followup.send(embed=embed)
 
 client.run(TOKEN)
