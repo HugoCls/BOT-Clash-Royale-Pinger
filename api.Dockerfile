@@ -12,6 +12,9 @@ WORKDIR /usr/src/app
 # Copy requirements file to the container
 COPY requirements.txt .
 
+# Install curl
+RUN apt-get update && apt-get install -y curl
+
 # Install the required Python dependencies
 RUN pip install -r requirements.txt
 
