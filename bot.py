@@ -7,9 +7,13 @@ import os
 import time
 import json
 import logging as log
-# from dotenv import load_dotenv
 
-# load_dotenv()
+ENV = os.getenv("ENV", "dev")
+
+if ENV == "dev":
+    from dotenv import load_dotenv
+
+    load_dotenv()
 
 log.basicConfig(level=log.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
