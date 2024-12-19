@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import logging as log
 from royaleapi_scraping_class import ScrapingRoyaleAPI
-import httpx
+import requests
 
 app = FastAPI()
 
@@ -25,7 +25,14 @@ def save_data():
 
 @app.get("/ping")
 def ping():
-    httpx.get('https://eooaw9cy4csi4kr.m.pipedream.net?id=BOT-API')
+    try:
+        log.info("Sending request to the external service.")
+        r = requests.get('https://eooaw9cy4csi4kr.m.pipedream.net/bot')
+        log.info(f"Response from external service: {r.status_code}")
+        return {"message": "Done"}
+    except requests.exceptions.RequestException as e:
+        log.error(f"Error while making the request: {e}")
+        return {"message": "Error occurred"}
 
     
 if __name__ == "__main__":
