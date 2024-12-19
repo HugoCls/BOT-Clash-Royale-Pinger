@@ -208,7 +208,7 @@ class ScrapingRoyaleAPI:
             _data = r.json()["rows"]
             _data = [{key: value for key, value in d.items() if key in ["contribution","decks_used", "clan_rank", "log_date"]} for d in _data]
             self.df_players_data.loc[self.df_players_data["cr_id"] == cr_id, "cw_last_scores"] = [str(_data)]  
-            log.error(f"{cr_id} went well: avg_contribution:{avg_contribution}, avg_real_contribution: {avg_real_contribution}, avg_decks_used:{avg_decks_used}, avg_clan_rank:{avg_clan_rank}")
+            log.info(f"{cr_id} went well: avg_contribution:{avg_contribution}, avg_real_contribution: {avg_real_contribution}, avg_decks_used:{avg_decks_used}, avg_clan_rank:{avg_clan_rank}")
             
             with open(SAVE_TIME_FILE, "w") as f:
                 current_time = time.time()
