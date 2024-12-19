@@ -3,7 +3,10 @@ import pandas as pd
 import ast
 import json
 from datetime import datetime
-    
+import logging as log
+
+log.basicConfig(level=log.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+ 
 def add_day_suffix(day):
     if 10 <= day <= 20:
         suffix = 'th'
